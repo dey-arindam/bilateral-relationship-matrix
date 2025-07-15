@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilateral Relationship Matrix</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for better visual appeal and responsiveness */
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+        }
+        .matrix-container {
+            overflow-x: auto; /* Enable horizontal scrolling for small screens */
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+        .matrix-table {
+            min-width: 600px; /* Ensure table doesn't shrink too much */
+        }
+        .score-cell {
+            font-weight: 600;
+            text-align: center;
+            padding: 0.75rem; /* Padding for cells */
+            border-radius: 0.5rem; /* Rounded corners for cells */
+            transition: background-color 0.3s ease; /* Smooth color transition */
+        }
+        /* Color classes for scores */
+        .score-improving-strong { background-color: #4CAF50; color: white; } /* Dark Green */
+        .score-improving-mild { background-color: #8BC34A; color: white; } /* Light Green */
+        .score-stable { background-color: #FFEB3B; color: #333; } /* Yellow */
+        .score-deteriorating-mild { background-color: #FFC107; color: #333; } /* Amber */
+        .score-deteriorating-strong { background-color: #F44336; color: white; } /* Red */
+        .score-na { background-color: #e0e0e0; color: #757575; font-style: italic; } /* Grey for N/A */
+
+        /* Responsive table headers for better readability on small screens */
+        @media (max-width: 768px) {
+            .matrix-table th, .matrix-table td {
+                padding: 0.5rem;
+                font-size: 0.875rem; /* Smaller font size on mobile */
+            }
+            .matrix-table th:first-child, .matrix-table td:first-child {
+                position: sticky;
+                left: 0;
+                background-color: #f8f8f8;
+                z-index: 10;
+                box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            }
+            .matrix-table thead th {
+                position: sticky;
+                top: 0;
+                background-color: #f8f8f8;
+                z-index: 20;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+        }
+
+        /* Custom modal for messages */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 sm:p-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6 text-center">Bilateral Relationship Score Matrix</h1>
+        <p class="text-gray-600 mb-8 text-center text-sm sm:text-base">
+            This matrix visualizes the relationship score between various country pairs over time.
+            Scores range from -10 (strongly deteriorating) to +10 (strongly improving), with 0 indicating stability.
+            The diagonal elements represent a country's relationship with itself and are marked as N/A.
+            Some scores are asymmetrical, reflecting directional differences in relationships.
+        </p>
+
+        <!-- Year Navigation and Display -->
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-6 p-4 bg-blue-50 rounded-lg shadow-sm">
+            <button id="prevYearBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                Previous Year
+            </button>
+            <div class="flex items-center gap-2">
+                <span class="text-gray-700 text-lg font-semibold">Year:</span>
+                <span id="currentYearDisplay" class="text-blue-700 text-2xl font-bold">2020</span>
+            </div>
+            <button id="playPauseBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                Play Animation
+            </button>
+            <button id="nextYearBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                Next Year
+            </button>
+        </div>
+
+        <div class="matrix-container rounded-lg border border-gray-200 shadow-sm">
+            <table class="matrix-table w-full border-collapse" id="relationshipTable">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tl-lg">Country</th>
+                        <th class="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">USA</th>
+                        <th class="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Canada</th>
+                        <th class="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Mexico</th>
+                        <th class="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">UK</th>
+                        <th class="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">France</th>
+                        <th class="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Germany</th>
+                        <th class="p-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider rounded-tr-lg">Japan</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <!-- Rows will be dynamically updated by JavaScript -->
+                    <tr data-country="USA">
+                        <td class="p-3 font-medium text-gray-900 whitespace-nowrap">USA</td>
+                        <td class="score-cell score-na" data-target-country="USA">N/A</td>
+                        <td class="score-cell" data-target-country="Canada"></td>
+                        <td class="score-cell" data-target-country="Mexico"></td>
+                        <td class="score-cell" data-target-country="UK"></td>
+                        <td class="score-cell" data-target-country="France"></td>
+                        <td class="score-cell" data-target-country="Germany"></td>
+                        <td class="score-cell" data-target-country="Japan"></td>
+                    </tr>
+                    <tr data-country="Canada">
+                        <td class="p-3 font-medium text-gray-900 whitespace-nowrap">Canada</td>
+                        <td class="score-cell" data-target-country="USA"></td>
+                        <td class="score-cell score-na" data-target-country="Canada">N/A</td>
+                        <td class="score-cell" data-target-country="Mexico"></td>
+                        <td class="score-cell" data-target-country="UK"></td>
+                        <td class="score-cell" data-target-country="France"></td>
+                        <td class="score-cell" data-target-country="Germany"></td>
+                        <td class="score-cell" data-target-country="Japan"></td>
+                    </tr>
+                    <tr data-country="Mexico">
+                        <td class="p-3 font-medium text-gray-900 whitespace-nowrap">Mexico</td>
+                        <td class="score-cell" data-target-country="USA"></td>
+                        <td class="score-cell" data-target-country="Canada"></td>
+                        <td class="score-cell score-na" data-target-country="Mexico">N/A</td>
+                        <td class="score-cell" data-target-country="UK"></td>
+                        <td class="score-cell" data-target-country="France"></td>
+                        <td class="score-cell" data-target-country="Germany"></td>
+                        <td class="score-cell" data-target-country="Japan"></td>
+                    </tr>
+                    <tr data-country="UK">
+                        <td class="p-3 font-medium text-gray-900 whitespace-nowrap">UK</td>
+                        <td class="score-cell" data-target-country="USA"></td>
+                        <td class="score-cell" data-target-country="Canada"></td>
+                        <td class="score-cell" data-target-country="Mexico"></td>
+                        <td class="score-cell score-na" data-target-country="UK">N/A</td>
+                        <td class="score-cell" data-target-country="France"></td>
+                        <td class="score-cell" data-target-country="Germany"></td>
+                        <td class="score-cell" data-target-country="Japan"></td>
+                    </tr>
+                    <tr data-country="France">
+                        <td class="p-3 font-medium text-gray-900 whitespace-nowrap">France</td>
+                        <td class="score-cell" data-target-country="USA"></td>
+                        <td class="score-cell" data-target-country="Canada"></td>
+                        <td class="score-cell" data-target-country="Mexico"></td>
+                        <td class="score-cell" data-target-country="UK"></td>
+                        <td class="score-cell score-na" data-target-country="France">N/A</td>
+                        <td class="score-cell" data-target-country="Germany"></td>
+                        <td class="score-cell" data-target-country="Japan"></td>
+                    </tr>
+                    <tr data-country="Germany">
+                        <td class="p-3 font-medium text-gray-900 whitespace-nowrap">Germany</td>
+                        <td class="score-cell" data-target-country="USA"></td>
+                        <td class="score-cell" data-target-country="Canada"></td>
+                        <td class="score-cell" data-target-country="Mexico"></td>
+                        <td class="score-cell" data-target-country="UK"></td>
+                        <td class="score-cell" data-target-country="France"></td>
+                        <td class="score-cell" data-target-country="Germany">N/A</td>
+                        <td class="score-cell" data-target-country="Japan"></td>
+                    </tr>
+                    <tr data-country="Japan">
+                        <td class="p-3 font-medium text-gray-900 whitespace-nowrap rounded-bl-lg">Japan</td>
+                        <td class="score-cell" data-target-country="USA"></td>
+                        <td class="score-cell" data-target-country="Canada"></td>
+                        <td class="score-cell" data-target-country="Mexico"></td>
+                        <td class="score-cell" data-target-country="UK"></td>
+                        <td class="score-cell" data-target-country="France"></td>
+                        <td class="score-cell" data-target-country="Germany"></td>
+                        <td class="score-cell score-na rounded-br-lg" data-target-country="Japan">N/A</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-8 text-center">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Score Interpretation:</h2>
+            <div class="flex flex-wrap justify-center gap-4">
+                <div class="flex items-center">
+                    <span class="w-6 h-6 rounded-full score-improving-strong mr-2"></span>
+                    <span class="text-gray-700 font-medium">Strongly Improving (+6 to +10)</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-6 h-6 rounded-full score-improving-mild mr-2"></span>
+                    <span class="text-gray-700 font-medium">Mildly Improving (+1 to +5)</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-6 h-6 rounded-full score-stable mr-2"></span>
+                    <span class="text-gray-700 font-medium">Stable (0)</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-6 h-6 rounded-full score-deteriorating-mild mr-2"></span>
+                    <span class="text-gray-700 font-medium">Mildly Deteriorating (-1 to -5)</span>
+                </div>
+                <div class="flex items-center">
+                    <span class="w-6 h-6 rounded-full score-deteriorating-strong mr-2"></span>
+                    <span class="text-gray-700 font-medium">Strongly Deteriorating (-6 to -10)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gemini API Feature -->
+        <div class="mt-12 p-6 bg-gray-50 rounded-xl shadow-md">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Get Insight ✨</h2>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+                <img src="https://placehold.co/180x30/000000/FFFFFF?text=Economist+Intelligence" alt="Economist Intelligence Logo" class="h-8 mb-2 sm:mb-0">
+                <p class="text-gray-600 text-center text-sm sm:text-base">
+                    Select two countries to get an insight into their bilateral relationship, powered by Economist Intelligence.
+                </p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+                <select id="country1Select" class="p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto">
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+                <span class="text-gray-600 font-semibold">to</span>
+                <select id="country2Select" class="p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto">
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+                <button id="getInsightBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 w-full sm:w-auto">
+                    Get Insight ✨
+                </button>
+            </div>
+
+            <div id="insightOutput" class="p-4 bg-blue-50 border border-blue-200 rounded-md text-gray-800 text-sm italic min-h-[50px] flex items-center justify-center text-center">
+                Select countries and click "Get Insight" to see the magic!
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="hidden flex justify-center items-center mt-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                <span class="ml-3 text-gray-600">Generating insight...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal for Messages -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeModalBtn">&times;</span>
+            <p id="modalMessage" class="text-lg text-gray-800"></p>
+            <button id="modalOkBtn" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // Function to show custom modal messages
+        function showMessage(message) {
+            const modal = document.getElementById('messageModal');
+            const modalMessage = document.getElementById('modalMessage');
+            modalMessage.textContent = message;
+            modal.style.display = 'flex'; // Use flex to center content
+        }
+
+        // Close modal button event listener
+        document.getElementById('closeModalBtn').addEventListener('click', () => {
+            document.getElementById('messageModal').style.display = 'none';
+        });
+
+        // OK button in modal event listener
+        document.getElementById('modalOkBtn').addEventListener('click', () => {
+            document.getElementById('messageModal').style.display = 'none';
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const relationshipTable = document.getElementById('relationshipTable');
+            const currentYearDisplay = document.getElementById('currentYearDisplay');
+            const prevYearBtn = document.getElementById('prevYearBtn');
+            const nextYearBtn = document.getElementById('nextYearBtn');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const country1Select = document.getElementById('country1Select');
+            const country2Select = document.getElementById('country2Select');
+            const getInsightBtn = document.getElementById('getInsightBtn');
+            const insightOutput = document.getElementById('insightOutput');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+
+            // Define historical data for relationships
+            const historicalData = {
+                2020: {
+                    "USA": { "Canada": "+7", "Mexico": "+3", "UK": "+8", "France": "+2", "Germany": "+6", "Japan": "+4" },
+                    "Canada": { "USA": "+7", "Mexico": "+1", "UK": "+5", "France": "0", "Germany": "+3", "Japan": "0" },
+                    "Mexico": { "USA": "+4", "Canada": "+1", "UK": "0", "France": "-5", "Germany": "0", "Japan": "+1" },
+                    "UK": { "USA": "+8", "Canada": "+5", "Mexico": "0", "France": "+1", "Germany": "+3", "Japan": "+2" },
+                    "France": { "USA": "+2", "Canada": "0", "Mexico": "-6", "UK": "0", "Germany": "+4", "Japan": "0" },
+                    "Germany": { "USA": "+6", "Canada": "+3", "Mexico": "0", "UK": "+3", "France": "+4", "Japan": "+5" },
+                    "Japan": { "USA": "+4", "Canada": "0", "Mexico": "+1", "UK": "+2", "France": "0", "Germany": "+2" }
+                },
+                2021: {
+                    "USA": { "Canada": "+8", "Mexico": "+4", "UK": "+9", "France": "+3", "Germany": "+7", "Japan": "+5" },
+                    "Canada": { "USA": "+8", "Mexico": "+2", "UK": "+6", "France": "0", "Germany": "+4", "Japan": "0" },
+                    "Mexico": { "USA": "+5", "Canada": "+2", "UK": "+1", "France": "-7", "Germany": "0", "Japan": "+2" },
+                    "UK": { "USA": "+9", "Canada": "+6", "Mexico": "+1", "France": "+2", "Germany": "+4", "Japan": "+3" },
+                    "France": { "USA": "+3", "Canada": "0", "Mexico": "-7", "UK": "+1", "Germany": "+5", "Japan": "0" },
+                    "Germany": { "USA": "+7", "Canada": "+4", "Mexico": "0", "UK": "+4", "France": "+5", "Japan": "+6" },
+                    "Japan": { "USA": "+5", "Canada": "0", "Mexico": "+2", "UK": "+3", "France": "0", "Germany": "+3" }
+                },
+                2022: {
+                    "USA": { "Canada": "+8", "Mexico": "+4", "UK": "+9", "France": "+3", "Germany": "+7", "Japan": "+5" },
+                    "Canada": { "USA": "+8", "Mexico": "+2", "UK": "+6", "France": "0", "Germany": "+4", "Japan": "0" },
+                    "Mexico": { "USA": "+5", "Canada": "+2", "UK": "+1", "France": "-7", "Germany": "0", "Japan": "+2" },
+                    "UK": { "USA": "+9", "Canada": "+6", "Mexico": "+1", "France": "+2", "Germany": "+4", "Japan": "+3" },
+                    "France": { "USA": "+3", "Canada": "0", "Mexico": "-7", "UK": "+1", "Germany": "+5", "Japan": "0" },
+                    "Germany": { "USA": "+7", "Canada": "+4", "Mexico": "0", "UK": "+4", "France": "+5", "Japan": "+6" },
+                    "Japan": { "USA": "+5", "Canada": "0", "Mexico": "+2", "UK": "+3", "France": "0", "Germany": "+3" }
+                },
+                2023: {
+                    "USA": { "Canada": "+7", "Mexico": "+3", "UK": "+8", "France": "+2", "Germany": "+6", "Japan": "+4" },
+                    "Canada": { "USA": "+7", "Mexico": "+1", "UK": "+5", "France": "0", "Germany": "+3", "Japan": "0" },
+                    "Mexico": { "USA": "+4", "Canada": "+1", "UK": "0", "France": "-5", "Germany": "0", "Japan": "+1" },
+                    "UK": { "USA": "+8", "Canada": "+5", "Mexico": "0", "France": "+1", "Germany": "+3", "Japan": "+2" },
+                    "France": { "USA": "+2", "Canada": "0", "Mexico": "-6", "UK": "0", "Germany": "+4", "Japan": "0" },
+                    "Germany": { "USA": "+6", "Canada": "+3", "Mexico": "0", "UK": "+3", "France": "+4", "Japan": "+5" },
+                    "Japan": { "USA": "+4", "Canada": "0", "Mexico": "+1", "UK": "+2", "France": "0", "Germany": "+2" }
+                },
+                2024: {
+                    "USA": { "Canada": "+6", "Mexico": "+2", "UK": "+7", "France": "+1", "Germany": "+5", "Japan": "+3" },
+                    "Canada": { "USA": "+6", "Mexico": "0", "UK": "+4", "France": "-1", "Germany": "+2", "Japan": "-1" },
+                    "Mexico": { "USA": "+3", "Canada": "0", "UK": "-1", "France": "-4", "Germany": "-1", "Japan": "0" },
+                    "UK": { "USA": "+7", "Canada": "+4", "Mexico": "-1", "France": "0", "Germany": "+2", "Japan": "+1" },
+                    "France": { "USA": "+1", "Canada": "-1", "Mexico": "-5", "UK": "-1", "Germany": "+3", "Japan": "-1" },
+                    "Germany": { "USA": "+5", "Canada": "+2", "Mexico": "-1", "UK": "+2", "France": "+3", "Japan": "+4" },
+                    "Japan": { "USA": "+3", "Canada": "-1", "Mexico": "0", "UK": "+1", "France": "-1", "Germany": "+1" }
+                },
+                2025: {
+                    "USA": { "Canada": "+8", "Mexico": "+4", "UK": "+9", "France": "+3", "Germany": "+7", "Japan": "+5" },
+                    "Canada": { "USA": "+8", "Mexico": "+2", "UK": "+6", "France": "0", "Germany": "+4", "Japan": "0" },
+                    "Mexico": { "USA": "+5", "Canada": "+2", "UK": "+1", "France": "-7", "Germany": "0", "Japan": "+2" },
+                    "UK": { "USA": "+9", "Canada": "+6", "Mexico": "+1", "France": "+2", "Germany": "+4", "Japan": "+3" },
+                    "France": { "USA": "+3", "Canada": "0", "Mexico": "-7", "UK": "+1", "Germany": "+5", "Japan": "0" },
+                    "Germany": { "USA": "+7", "Canada": "+4", "Mexico": "0", "UK": "+4", "France": "+5", "Japan": "+6" },
+                    "Japan": { "USA": "+5", "Canada": "0", "Mexico": "+2", "UK": "+3", "France": "0", "Germany": "+3" }
+                }
+            };
+
+            const years = Object.keys(historicalData).map(Number).sort((a, b) => a - b);
+            let currentYearIndex = 0;
+            let animationIntervalId = null;
+            const animationSpeed = 1500; // milliseconds per year
+
+            // Function to update the matrix based on the current year
+            function updateMatrix(year) {
+                currentYearDisplay.textContent = year;
+                const yearData = historicalData[year];
+                const countries = Object.keys(yearData); // Get countries from the data
+
+                countries.forEach(fromCountry => {
+                    const row = relationshipTable.querySelector(`tr[data-country="${fromCountry}"]`);
+                    if (row) {
+                        countries.forEach(toCountry => {
+                            if (fromCountry === toCountry) {
+                                // Diagonal N/A cells are static
+                                return;
+                            }
+                            const cell = row.querySelector(`td[data-target-country="${toCountry}"]`);
+                            if (cell) {
+                                const score = yearData[fromCountry][toCountry];
+                                cell.textContent = score;
+                                // Remove all existing score classes
+                                cell.classList.remove('score-improving-strong', 'score-improving-mild', 'score-stable', 'score-deteriorating-mild', 'score-deteriorating-strong');
+                                // Add the new score class based on the value
+                                const numericScore = parseInt(score);
+                                if (!isNaN(numericScore)) {
+                                    if (numericScore >= 6) {
+                                        cell.classList.add('score-improving-strong');
+                                    } else if (numericScore >= 1) {
+                                        cell.classList.add('score-improving-mild');
+                                    } else if (numericScore === 0) {
+                                        cell.classList.add('score-stable');
+                                    } else if (numericScore >= -5) {
+                                        cell.classList.add('score-deteriorating-mild');
+                                    } else { // numericScore <= -6
+                                        cell.classList.add('score-deteriorating-strong');
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Function to navigate to the previous year
+            function showPreviousYear() {
+                pauseAnimation();
+                currentYearIndex = (currentYearIndex - 1 + years.length) % years.length;
+                updateMatrix(years[currentYearIndex]);
+            }
+
+            // Function to navigate to the next year
+            function showNextYear() {
+                pauseAnimation();
+                currentYearIndex = (currentYearIndex + 1) % years.length;
+                updateMatrix(years[currentYearIndex]);
+            }
+
+            // Function to start the animation
+            function playAnimation() {
+                if (animationIntervalId) {
+                    // If already playing, do nothing
+                    return;
+                }
+                playPauseBtn.textContent = "Pause Animation";
+                playPauseBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                playPauseBtn.classList.add('bg-orange-500', 'hover:bg-orange-600');
+                animationIntervalId = setInterval(() => {
+                    currentYearIndex = (currentYearIndex + 1) % years.length;
+                    updateMatrix(years[currentYearIndex]);
+                }, animationSpeed);
+            }
+
+            // Function to pause the animation
+            function pauseAnimation() {
+                clearInterval(animationIntervalId);
+                animationIntervalId = null;
+                playPauseBtn.textContent = "Play Animation";
+                playPauseBtn.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+                playPauseBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+            }
+
+            // Event Listeners for year navigation
+            prevYearBtn.addEventListener('click', showPreviousYear);
+            nextYearBtn.addEventListener('click', showNextYear);
+            playPauseBtn.addEventListener('click', () => {
+                if (animationIntervalId) {
+                    pauseAnimation();
+                } else {
+                    playAnimation();
+                }
+            });
+
+            // Initial matrix update
+            updateMatrix(years[currentYearIndex]);
+
+            // Populate country dropdowns for LLM feature
+            const countries = [];
+            const headerCells = relationshipTable.querySelectorAll('thead th');
+            headerCells.forEach((th, index) => {
+                if (index > 0) { // Skip the first 'Country' header
+                    const countryName = th.textContent.trim();
+                    countries.push(countryName);
+                }
+            });
+
+            countries.forEach(country => {
+                const option1 = document.createElement('option');
+                option1.value = country;
+                option1.textContent = country;
+                country1Select.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = country;
+                option2.textContent = country;
+                country2Select.appendChild(option2);
+            });
+
+            // Set default selections to avoid N/A
+            country1Select.value = 'USA';
+            country2Select.value = 'Canada';
+
+
+            getInsightBtn.addEventListener('click', async () => {
+                const country1 = country1Select.value;
+                const country2 = country2Select.value;
+                const currentYear = years[currentYearIndex];
+
+                if (country1 === country2) {
+                    showMessage("Please select two different countries for an insight.");
+                    insightOutput.textContent = "Select countries and click 'Get Insight' to see the magic!";
+                    return;
+                }
+
+                insightOutput.textContent = ''; // Clear previous insight
+                loadingSpinner.classList.remove('hidden'); // Show loading spinner
+
+                let score = 'N/A';
+                let scoreClass = 'score-na';
+
+                // Get the score from the currently displayed year's data
+                const yearData = historicalData[currentYear];
+                if (yearData && yearData[country1] && yearData[country1][country2]) {
+                    score = yearData[country1][country2];
+                    // Determine score class based on the score value
+                    const numericScore = parseInt(score);
+                    if (!isNaN(numericScore)) {
+                        if (numericScore >= 6) {
+                            scoreClass = 'score-improving-strong';
+                        } else if (numericScore >= 1) {
+                            scoreClass = 'score-improving-mild';
+                        } else if (numericScore === 0) {
+                            scoreClass = 'score-stable';
+                        } else if (numericScore >= -5) {
+                            scoreClass = 'score-deteriorating-mild';
+                        } else { // numericScore <= -6
+                            scoreClass = 'score-deteriorating-strong';
+                        }
+                    }
+                }
+
+                let relationshipStatus = "stable";
+                if (scoreClass.includes('improving-strong')) {
+                    relationshipStatus = "strongly improving";
+                } else if (scoreClass.includes('improving-mild')) {
+                    relationshipStatus = "mildly improving";
+                } else if (scoreClass.includes('deteriorating-strong')) {
+                    relationshipStatus = "strongly deteriorating";
+                } else if (scoreClass.includes('deteriorating-mild')) {
+                    relationshipStatus = "mildly deteriorating";
+                } else if (scoreClass.includes('stable')) {
+                    relationshipStatus = "stable";
+                }
+
+                // Updated prompt to remove "hypothetical"
+                let prompt = `For the year ${currentYear}, given that the bilateral relationship score between ${country1} and ${country2} is ${score} (where +10 is strongly improving and -10 is strongly deteriorating), provide a brief insight into the nature of this relationship. Focus on general aspects like diplomacy, trade, or cultural exchange, without mentioning specific real-world events. The relationship is currently considered ${relationshipStatus}.`;
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = ""; // Canvas will automatically provide the API key
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(`API error: ${response.status} - ${errorData.error.message || 'Unknown error'}`);
+                    }
+
+                    const result = await response.json();
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        insightOutput.textContent = text;
+                    } else {
+                        insightOutput.textContent = "Could not generate insight. Please try again.";
+                    }
+                } catch (error) {
+                    console.error("Error calling Gemini API:", error);
+                    showMessage(`Failed to generate insight: ${error.message}. Please check console for details.`);
+                    insightOutput.textContent = "Error generating insight. Please try again.";
+                } finally {
+                    loadingSpinner.classList.add('hidden'); // Hide loading spinner
+                }
+            });
+        });
+    </script>
+</body>
+</html>
