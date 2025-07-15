@@ -1,1 +1,1 @@
-# bilateral-relationship-matrix
+# A mock-up of bilateral relationship matrix
