@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilateral Relationship Time Series Plot</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN for plotting -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f0f2f5;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px; /* Fixed height for the chart */
+            width: 100%;
+            max-width: 800px; /* Max width for larger screens */
+            margin: 0 auto; /* Center the chart */
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg p-6 sm:p-8">
+        <!-- Navigation Buttons -->
+        <div class="flex justify-center gap-4 mb-6">
+            <a href="index.html" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                View Matrix
+            </a>
+            <span class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">
+                View Time Series Plot
+            </span>
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6 text-center">Bilateral Relationship Time Series Plot</h1>
+        <p class="text-gray-600 mb-8 text-center text-sm sm:text-base">
+            Select a country to visualize its bilateral relationship scores with other countries over the years.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+            <label for="selectCountry" class="text-lg font-semibold text-gray-700">Select Country:</label>
+            <select id="selectCountry" class="p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 w-full sm:w-auto">
+                <!-- Options will be populated by JavaScript -->
+            </select>
+            <button id="plotButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 w-full sm:w-auto">
+                Generate Plot
+            </button>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="relationshipChart"></canvas>
+        </div>
+
+        <div id="noDataMessage" class="hidden text-center text-gray-600 mt-4">
+            No data available for the selected country's relationships.
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const selectCountry = document.getElementById('selectCountry');
+            const plotButton = document.getElementById('plotButton');
+            const relationshipChartCanvas = document.getElementById('relationshipChart');
+            const noDataMessage = document.getElementById('noDataMessage');
+            let myChart = null; // To store the Chart.js instance
+
+            // Define historical data for relationships (same as in the matrix)
+            const historicalData = {
+                2020: {
+                    "USA": { "Canada": "+0.7", "Mexico": "+0.3", "UK": "+0.8", "France": "+0.2", "Germany": "+0.6", "Japan": "+0.4" },
+                    "Canada": { "USA": "+0.7", "Mexico": "+0.1", "UK": "+0.5", "France": "0.0", "Germany": "+0.3", "Japan": "0.0" },
+                    "Mexico": { "USA": "+0.4", "Canada": "+0.1", "UK": "0.0", "France": "-0.5", "Germany": "0.0", "Japan": "+0.1" },
+                    "UK": { "USA": "+0.8", "Canada": "+0.5", "Mexico": "0.0", "France": "+0.1", "Germany": "+0.3", "Japan": "+0.2" },
+                    "France": { "USA": "+0.2", "Canada": "0.0", "Mexico": "-0.6", "UK": "0.0", "Germany": "+0.4", "Japan": "0.0" },
+                    "Germany": { "USA": "+0.6", "Canada": "+0.3", "Mexico": "0.0", "UK": "+0.3", "France": "+0.4", "Japan": "+0.5" },
+                    "Japan": { "USA": "+0.4", "Canada": "0.0", "Mexico": "+0.1", "UK": "+0.2", "France": "0.0", "Germany": "+0.2" }
+                },
+                2021: {
+                    "USA": { "Canada": "+0.8", "Mexico": "+0.4", "UK": "+0.9", "France": "+0.3", "Germany": "+0.7", "Japan": "+0.5" },
+                    "Canada": { "USA": "+0.8", "Mexico": "+0.2", "UK": "+0.6", "France": "0.0", "Germany": "+0.4", "Japan": "0.0" },
+                    "Mexico": { "USA": "+0.5", "Canada": "+0.2", "UK": "+0.1", "France": "-0.7", "Germany": "0.0", "Japan": "+0.2" },
+                    "UK": { "USA": "+0.9", "Canada": "+0.6", "Mexico": "+0.1", "France": "+0.2", "Germany": "+0.4", "Japan": "+0.3" },
+                    "France": { "USA": "+0.3", "Canada": "0.0", "Mexico": "-0.7", "UK": "+0.1", "Germany": "+0.5", "Japan": "0.0" },
+                    "Germany": { "USA": "+0.7", "Canada": "+0.4", "Mexico": "0.0", "UK": "+0.4", "France": "+0.5", "Japan": "+0.6" },
+                    "Japan": { "USA": "+0.5", "Canada": "0.0", "Mexico": "+0.2", "UK": "+0.3", "France": "0.0", "Germany": "+0.3" }
+                },
+                2022: {
+                    "USA": { "Canada": "+0.8", "Mexico": "+0.4", "UK": "+0.9", "France": "+0.3", "Germany": "+0.7", "Japan": "+0.5" },
+                    "Canada": { "USA": "+0.8", "Mexico": "+0.2", "UK": "+0.6", "France": "0.0", "Germany": "+0.4", "Japan": "0.0" },
+                    "Mexico": { "USA": "+0.5", "Canada": "+0.2", "UK": "+0.1", "France": "-0.7", "Germany": "0.0", "Japan": "+0.2" },
+                    "UK": { "USA": "+0.9", "Canada": "+0.6", "Mexico": "+0.1", "France": "+0.2", "Germany": "+0.4", "Japan": "+0.3" },
+                    "France": { "USA": "+0.3", "Canada": "0.0", "Mexico": "-0.7", "UK": "+0.1", "Germany": "+0.5", "Japan": "0.0" },
+                    "Germany": { "USA": "+0.7", "Canada": "+0.4", "Mexico": "0.0", "UK": "+0.4", "France": "+0.5", "Japan": "+0.6" },
+                    "Japan": { "USA": "+0.5", "Canada": "0.0", "Mexico": "+0.2", "UK": "+0.3", "France": "0.0", "Germany": "+0.3" }
+                },
+                2023: {
+                    "USA": { "Canada": "+0.7", "Mexico": "+0.3", "UK": "+0.8", "France": "+0.2", "Germany": "+0.6", "Japan": "+0.4" },
+                    "Canada": { "USA": "+0.7", "Mexico": "+0.1", "UK": "+0.5", "France": "0.0", "Germany": "+0.3", "Japan": "0.0" },
+                    "Mexico": { "USA": "+0.4", "Canada": "+0.1", "UK": "0.0", "France": "-0.5", "Germany": "0.0", "Japan": "+0.1" },
+                    "UK": { "USA": "+0.8", "Canada": "+0.5", "Mexico": "0.0", "France": "+0.1", "Germany": "+0.3", "Japan": "+0.2" },
+                    "France": { "USA": "+0.2", "Canada": "0.0", "Mexico": "-0.6", "UK": "0.0", "Germany": "+0.4", "Japan": "0.0" },
+                    "Germany": { "USA": "+0.6", "Canada": "+0.3", "Mexico": "0.0", "UK": "+0.3", "France": "+0.4", "Japan": "+0.5" },
+                    "Japan": { "USA": "+0.4", "Canada": "0.0", "Mexico": "+0.1", "UK": "+0.2", "France": "0.0", "Germany": "+0.2" }
+                },
+                2024: {
+                    "USA": { "Canada": "+0.6", "Mexico": "+0.2", "UK": "+0.7", "France": "+0.1", "Germany": "+0.5", "Japan": "+0.3" },
+                    "Canada": { "USA": "+0.6", "Mexico": "0.0", "UK": "+0.4", "France": "-0.1", "Germany": "+0.2", "Japan": "-0.1" },
+                    "Mexico": { "USA": "+0.3", "Canada": "0.0", "UK": "-0.1", "France": "-0.4", "Germany": "-0.1", "Japan": "0.0" },
+                    "UK": { "USA": "+0.7", "Canada": "+0.4", "Mexico": "-0.1", "France": "0.0", "Germany": "+0.2", "Japan": "+0.1" },
+                    "France": { "USA": "+0.1", "Canada": "-0.1", "Mexico": "-0.5", "UK": "-0.1", "Germany": "+0.3", "Japan": "-0.1" },
+                    "Germany": { "USA": "+0.5", "Canada": "+0.2", "Mexico": "-0.1", "UK": "+0.2", "France": "+0.3", "Japan": "+0.4" },
+                    "Japan": { "USA": "+0.3", "Canada": "-0.1", "Mexico": "0.0", "UK": "+0.1", "France": "-0.1", "Germany": "+0.1" }
+                },
+                2025: {
+                    "USA": { "Canada": "+0.8", "Mexico": "+0.4", "UK": "+0.9", "France": "+0.3", "Germany": "+0.7", "Japan": "+0.5" },
+                    "Canada": { "USA": "+0.8", "Mexico": "+0.2", "UK": "+0.6", "France": "0.0", "Germany": "+0.4", "Japan": "0.0" },
+                    "Mexico": { "USA": "+0.5", "Canada": "+0.2", "UK": "+0.1", "France": "-0.7", "Germany": "0.0", "Japan": "+0.2" },
+                    "UK": { "USA": "+0.9", "Canada": "+0.6", "Mexico": "+0.1", "France": "+0.2", "Germany": "+0.4", "Japan": "+0.3" },
+                    "France": { "USA": "+0.3", "Canada": "0.0", "Mexico": "-0.7", "UK": "+0.1", "Germany": "+0.5", "Japan": "0.0" },
+                    "Germany": { "USA": "+0.7", "Canada": "+0.4", "Mexico": "0.0", "UK": "+0.4", "France": "+0.5", "Japan": "+0.6" },
+                    "Japan": { "USA": "+0.5", "Canada": "0.0", "Mexico": "+0.2", "UK": "+0.3", "France": "0.0", "Germany": "+0.3" }
+                }
+            };
+
+            const years = Object.keys(historicalData).map(Number).sort((a, b) => a - b);
+            const allCountries = Object.keys(historicalData[years[0]]);
+
+            // Populate country dropdown
+            allCountries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country;
+                option.textContent = country;
+                selectCountry.appendChild(option);
+            });
+
+            // Set a default selected country to Mexico
+            selectCountry.value = 'Mexico'; // Changed from 'USA' to 'Mexico'
+
+            plotButton.addEventListener('click', () => {
+                const selectedCountry = selectCountry.value;
+                if (!selectedCountry) {
+                    noDataMessage.textContent = "Please select a country.";
+                    noDataMessage.classList.remove('hidden');
+                    if (myChart) myChart.destroy(); // Destroy existing chart if any
+                    return;
+                }
+
+                noDataMessage.classList.add('hidden'); // Hide no data message
+
+                const datasets = [];
+                const colors = [
+                    'rgb(75, 192, 192)', 'rgb(255, 99, 132)', 'rgb(54, 162, 235)',
+                    'rgb(255, 205, 86)', 'rgb(153, 102, 255)', 'rgb(201, 203, 207)',
+                    'rgb(255, 159, 64)', 'rgb(75, 192, 192)', 'rgb(255, 99, 132)'
+                ]; // More colors if needed
+
+                let colorIndex = 0;
+
+                // Iterate through all other countries to create datasets
+                allCountries.forEach(targetCountry => {
+                    if (selectedCountry === targetCountry) {
+                        return; // Skip self-relationship
+                    }
+
+                    const dataPoints = years.map(year => {
+                        const score = historicalData[year][selectedCountry] ? historicalData[year][selectedCountry][targetCountry] : undefined;
+                        return score !== undefined ? parseFloat(score) : null; // Use null for missing data
+                    });
+
+                    // Only add dataset if there's actual data points
+                    if (dataPoints.some(point => point !== null)) {
+                        datasets.push({
+                            label: `${selectedCountry} to ${targetCountry}`,
+                            data: dataPoints,
+                            borderColor: colors[colorIndex % colors.length],
+                            tension: 0.1,
+                            fill: false,
+                            pointRadius: 5,
+                            pointHoverRadius: 8,
+                            pointBackgroundColor: colors[colorIndex % colors.length],
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
+                        });
+                        colorIndex++;
+                    }
+                });
+
+                if (datasets.length === 0) {
+                    noDataMessage.textContent = `No relationship data available for ${selectedCountry} with other countries.`;
+                    noDataMessage.classList.remove('hidden');
+                    if (myChart) myChart.destroy();
+                    return;
+                }
+
+                // Destroy existing chart if it exists
+                if (myChart) {
+                    myChart.destroy();
+                }
+
+                // Create new chart
+                myChart = new Chart(relationshipChartCanvas, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: `Bilateral Relationship Scores: ${selectedCountry} vs. Other Countries Over Time`,
+                                font: {
+                                    size: 18
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y.toFixed(1); // Format to one decimal place
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Year'
+                                },
+                                ticks: {
+                                    callback: function(value, index, values) {
+                                        return years[index]; // Display full year
+                                    }
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Relationship Score (+1.0 to -1.0)'
+                                },
+                                min: -1.0,
+                                max: 1.0,
+                                ticks: {
+                                    stepSize: 0.2, // Adjust tick step size for better readability
+                                    callback: function(value) {
+                                        return value.toFixed(1); // Format to one decimal place
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Trigger plot generation for the default selected country on load
+            plotButton.click();
+        });
+    </script>
+</body>
+</html>
