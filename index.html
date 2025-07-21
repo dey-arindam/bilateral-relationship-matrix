@@ -111,7 +111,7 @@
         <h1 class="text-3xl sm:text-4xl font-bold text-gray-800 mb-6 text-center">Bilateral Relationship Score Matrix</h1>
         <p class="text-gray-600 mb-8 text-center text-sm sm:text-base">
             This matrix visualizes the relationship score between various country pairs over time.
-            Scores range from -10 (strongly deteriorating) to +10 (strongly improving), with 0 indicating stability.
+            Scores range from -1.0 (strongly deteriorating) to +1.0 (strongly improving), with 0 indicating stability.
             Some scores are asymmetrical, reflecting directional differences in relationships.
         </p>
 
@@ -150,7 +150,7 @@
                     <!-- Rows will be dynamically updated by JavaScript -->
                     <tr data-country="USA">
                         <td class="p-3 font-medium text-gray-900 whitespace-nowrap">USA</td>
-                        <td class="score-cell score-na" data-target-country="USA">N/A</td>
+                        <td class="score-cell score-na" data-target-country="USA">---</td>
                         <td class="score-cell" data-target-country="Canada"></td>
                         <td class="score-cell" data-target-country="Mexico"></td>
                         <td class="score-cell" data-target-country="UK"></td>
@@ -161,7 +161,7 @@
                     <tr data-country="Canada">
                         <td class="p-3 font-medium text-gray-900 whitespace-nowrap">Canada</td>
                         <td class="score-cell" data-target-country="USA"></td>
-                        <td class="score-cell score-na" data-target-country="Canada">N/A</td>
+                        <td class="score-cell score-na" data-target-country="Canada">---</td>
                         <td class="score-cell" data-target-country="Mexico"></td>
                         <td class="score-cell" data-target-country="UK"></td>
                         <td class="score-cell" data-target-country="France"></td>
@@ -172,7 +172,7 @@
                         <td class="p-3 font-medium text-gray-900 whitespace-nowrap">Mexico</td>
                         <td class="score-cell" data-target-country="USA"></td>
                         <td class="score-cell" data-target-country="Canada"></td>
-                        <td class="score-cell score-na" data-target-country="Mexico">N/A</td>
+                        <td class="score-cell score-na" data-target-country="Mexico">---</td>
                         <td class="score-cell" data-target-country="UK"></td>
                         <td class="score-cell" data-target-country="France"></td>
                         <td class="score-cell" data-target-country="Germany"></td>
@@ -183,7 +183,7 @@
                         <td class="score-cell" data-target-country="USA"></td>
                         <td class="score-cell" data-target-country="Canada"></td>
                         <td class="score-cell" data-target-country="Mexico"></td>
-                        <td class="score-cell score-na" data-target-country="UK">N/A</td>
+                        <td class="score-cell score-na" data-target-country="UK">---</td>
                         <td class="score-cell" data-target-country="France"></td>
                         <td class="score-cell" data-target-country="Germany"></td>
                         <td class="score-cell" data-target-country="Japan"></td>
@@ -194,7 +194,7 @@
                         <td class="score-cell" data-target-country="Canada"></td>
                         <td class="score-cell" data-target-country="Mexico"></td>
                         <td class="score-cell" data-target-country="UK"></td>
-                        <td class="score-cell score-na" data-target-country="France">N/A</td>
+                        <td class="score-cell score-na" data-target-country="France">---</td>
                         <td class="score-cell" data-target-country="Germany"></td>
                         <td class="score-cell" data-target-country="Japan"></td>
                     </tr>
@@ -205,7 +205,7 @@
                         <td class="score-cell" data-target-country="Mexico"></td>
                         <td class="score-cell" data-target-country="UK"></td>
                         <td class="score-cell" data-target-country="France"></td>
-                        <td class="score-cell" data-target-country="Germany">N/A</td>
+                        <td class="score-cell score-na" data-target-country="Germany">---</td>
                         <td class="score-cell" data-target-country="Japan"></td>
                     </tr>
                     <tr data-country="Japan">
@@ -216,7 +216,7 @@
                         <td class="score-cell" data-target-country="UK"></td>
                         <td class="score-cell" data-target-country="France"></td>
                         <td class="score-cell" data-target-country="Germany"></td>
-                        <td class="score-cell score-na rounded-br-lg" data-target-country="Japan">N/A</td>
+                        <td class="score-cell score-na rounded-br-lg" data-target-country="Japan">---</td>
                     </tr>
                 </tbody>
             </table>
@@ -227,23 +227,23 @@
             <div class="flex flex-wrap justify-center gap-4">
                 <div class="flex items-center">
                     <span class="w-6 h-6 rounded-full score-improving-strong mr-2"></span>
-                    <span class="text-gray-700 font-medium">Strongly Improving (+6 to +10)</span>
+                    <span class="text-gray-700 font-medium">Strongly Improving (+0.6 to +1.0)</span>
                 </div>
                 <div class="flex items-center">
                     <span class="w-6 h-6 rounded-full score-improving-mild mr-2"></span>
-                    <span class="text-gray-700 font-medium">Mildly Improving (+1 to +5)</span>
+                    <span class="text-gray-700 font-medium">Mildly Improving (+0.1 to +0.5)</span>
                 </div>
                 <div class="flex items-center">
                     <span class="w-6 h-6 rounded-full score-stable mr-2"></span>
-                    <span class="text-gray-700 font-medium">Stable (0)</span>
+                    <span class="text-gray-700 font-medium">Stable (0.0)</span>
                 </div>
                 <div class="flex items-center">
                     <span class="w-6 h-6 rounded-full score-deteriorating-mild mr-2"></span>
-                    <span class="text-gray-700 font-medium">Mildly Deteriorating (-1 to -5)</span>
+                    <span class="text-gray-700 font-medium">Mildly Deteriorating (-0.1 to -0.5)</span>
                 </div>
                 <div class="flex items-center">
                     <span class="w-6 h-6 rounded-full score-deteriorating-strong mr-2"></span>
-                    <span class="text-gray-700 font-medium">Strongly Deteriorating (-6 to -10)</span>
+                    <span class="text-gray-700 font-medium">Strongly Deteriorating (-0.6 to -1.0)</span>
                 </div>
             </div>
         </div>
@@ -325,58 +325,58 @@
             // Define historical data for relationships
             const historicalData = {
                 2020: {
-                    "USA": { "Canada": "+7", "Mexico": "+3", "UK": "+8", "France": "+2", "Germany": "+6", "Japan": "+4" },
-                    "Canada": { "USA": "+7", "Mexico": "+1", "UK": "+5", "France": "0", "Germany": "+3", "Japan": "0" },
-                    "Mexico": { "USA": "+4", "Canada": "+1", "UK": "0", "France": "-5", "Germany": "0", "Japan": "+1" },
-                    "UK": { "USA": "+8", "Canada": "+5", "Mexico": "0", "France": "+1", "Germany": "+3", "Japan": "+2" },
-                    "France": { "USA": "+2", "Canada": "0", "Mexico": "-6", "UK": "0", "Germany": "+4", "Japan": "0" },
-                    "Germany": { "USA": "+6", "Canada": "+3", "Mexico": "0", "UK": "+3", "France": "+4", "Japan": "+5" },
-                    "Japan": { "USA": "+4", "Canada": "0", "Mexico": "+1", "UK": "+2", "France": "0", "Germany": "+2" }
+                    "USA": { "Canada": "+0.7", "Mexico": "+0.3", "UK": "+0.8", "France": "+0.2", "Germany": "+0.6", "Japan": "+0.4" },
+                    "Canada": { "USA": "+0.7", "Mexico": "+0.1", "UK": "+0.5", "France": "0.0", "Germany": "+0.3", "Japan": "0.0" },
+                    "Mexico": { "USA": "+0.4", "Canada": "+0.1", "UK": "0.0", "France": "-0.5", "Germany": "0.0", "Japan": "+0.1" },
+                    "UK": { "USA": "+0.8", "Canada": "+0.5", "Mexico": "0.0", "France": "+0.1", "Germany": "+0.3", "Japan": "+0.2" },
+                    "France": { "USA": "+0.2", "Canada": "0.0", "Mexico": "-0.6", "UK": "0.0", "Germany": "+0.4", "Japan": "0.0" },
+                    "Germany": { "USA": "+0.6", "Canada": "+0.3", "Mexico": "0.0", "UK": "+0.3", "France": "+0.4", "Japan": "+0.5" },
+                    "Japan": { "USA": "+0.4", "Canada": "0.0", "Mexico": "+0.1", "UK": "+0.2", "France": "0.0", "Germany": "+0.2" }
                 },
                 2021: {
-                    "USA": { "Canada": "+8", "Mexico": "+4", "UK": "+9", "France": "+3", "Germany": "+7", "Japan": "+5" },
-                    "Canada": { "USA": "+8", "Mexico": "+2", "UK": "+6", "France": "0", "Germany": "+4", "Japan": "0" },
-                    "Mexico": { "USA": "+5", "Canada": "+2", "UK": "+1", "France": "-7", "Germany": "0", "Japan": "+2" },
-                    "UK": { "USA": "+9", "Canada": "+6", "Mexico": "+1", "France": "+2", "Germany": "+4", "Japan": "+3" },
-                    "France": { "USA": "+3", "Canada": "0", "Mexico": "-7", "UK": "+1", "Germany": "+5", "Japan": "0" },
-                    "Germany": { "USA": "+7", "Canada": "+4", "Mexico": "0", "UK": "+4", "France": "+5", "Japan": "+6" },
-                    "Japan": { "USA": "+5", "Canada": "0", "Mexico": "+2", "UK": "+3", "France": "0", "Germany": "+3" }
+                    "USA": { "Canada": "+0.8", "Mexico": "+0.4", "UK": "+0.9", "France": "+0.3", "Germany": "+0.7", "Japan": "+0.5" },
+                    "Canada": { "USA": "+0.8", "Mexico": "+0.2", "UK": "+0.6", "France": "0.0", "Germany": "+0.4", "Japan": "0.0" },
+                    "Mexico": { "USA": "+0.5", "Canada": "+0.2", "UK": "+0.1", "France": "-0.7", "Germany": "0.0", "Japan": "+0.2" },
+                    "UK": { "USA": "+0.9", "Canada": "+0.6", "Mexico": "+0.1", "France": "+0.2", "Germany": "+0.4", "Japan": "+0.3" },
+                    "France": { "USA": "+0.3", "Canada": "0.0", "Mexico": "-0.7", "UK": "+0.1", "Germany": "+0.5", "Japan": "0.0" },
+                    "Germany": { "USA": "+0.7", "Canada": "+0.4", "Mexico": "0.0", "UK": "+0.4", "France": "+0.5", "Japan": "+0.6" },
+                    "Japan": { "USA": "+0.5", "Canada": "0.0", "Mexico": "+0.2", "UK": "+0.3", "France": "0.0", "Germany": "+0.3" }
                 },
                 2022: {
-                    "USA": { "Canada": "+8", "Mexico": "+4", "UK": "+9", "France": "+3", "Germany": "+7", "Japan": "+5" },
-                    "Canada": { "USA": "+8", "Mexico": "+2", "UK": "+6", "France": "0", "Germany": "+4", "Japan": "0" },
-                    "Mexico": { "USA": "+5", "Canada": "+2", "UK": "+1", "France": "-7", "Germany": "0", "Japan": "+2" },
-                    "UK": { "USA": "+9", "Canada": "+6", "Mexico": "+1", "France": "+2", "Germany": "+4", "Japan": "+3" },
-                    "France": { "USA": "+3", "Canada": "0", "Mexico": "-7", "UK": "+1", "Germany": "+5", "Japan": "0" },
-                    "Germany": { "USA": "+7", "Canada": "+4", "Mexico": "0", "UK": "+4", "France": "+5", "Japan": "+6" },
-                    "Japan": { "USA": "+5", "Canada": "0", "Mexico": "+2", "UK": "+3", "France": "0", "Germany": "+3" }
+                    "USA": { "Canada": "+0.8", "Mexico": "+0.4", "UK": "+0.9", "France": "+0.3", "Germany": "+0.7", "Japan": "+0.5" },
+                    "Canada": { "USA": "+0.8", "Mexico": "+0.2", "UK": "+0.6", "France": "0.0", "Germany": "+0.4", "Japan": "0.0" },
+                    "Mexico": { "USA": "+0.5", "Canada": "+0.2", "UK": "+0.1", "France": "-0.7", "Germany": "0.0", "Japan": "+0.2" },
+                    "UK": { "USA": "+0.9", "Canada": "+0.6", "Mexico": "+0.1", "France": "+0.2", "Germany": "+0.4", "Japan": "+0.3" },
+                    "France": { "USA": "+0.3", "Canada": "0.0", "Mexico": "-0.7", "UK": "+0.1", "Germany": "+0.5", "Japan": "0.0" },
+                    "Germany": { "USA": "+0.7", "Canada": "+0.4", "Mexico": "0.0", "UK": "+0.4", "France": "+0.5", "Japan": "+0.6" },
+                    "Japan": { "USA": "+0.5", "Canada": "0.0", "Mexico": "+0.2", "UK": "+0.3", "France": "0.0", "Germany": "+0.3" }
                 },
                 2023: {
-                    "USA": { "Canada": "+7", "Mexico": "+3", "UK": "+8", "France": "+2", "Germany": "+6", "Japan": "+4" },
-                    "Canada": { "USA": "+7", "Mexico": "+1", "UK": "+5", "France": "0", "Germany": "+3", "Japan": "0" },
-                    "Mexico": { "USA": "+4", "Canada": "+1", "UK": "0", "France": "-5", "Germany": "0", "Japan": "+1" },
-                    "UK": { "USA": "+8", "Canada": "+5", "Mexico": "0", "France": "+1", "Germany": "+3", "Japan": "+2" },
-                    "France": { "USA": "+2", "Canada": "0", "Mexico": "-6", "UK": "0", "Germany": "+4", "Japan": "0" },
-                    "Germany": { "USA": "+6", "Canada": "+3", "Mexico": "0", "UK": "+3", "France": "+4", "Japan": "+5" },
-                    "Japan": { "USA": "+4", "Canada": "0", "Mexico": "+1", "UK": "+2", "France": "0", "Germany": "+2" }
+                    "USA": { "Canada": "+0.7", "Mexico": "+0.3", "UK": "+0.8", "France": "+0.2", "Germany": "+0.6", "Japan": "+0.4" },
+                    "Canada": { "USA": "+0.7", "Mexico": "+0.1", "UK": "+0.5", "France": "0.0", "Germany": "+0.3", "Japan": "0.0" },
+                    "Mexico": { "USA": "+0.4", "Canada": "+0.1", "UK": "0.0", "France": "-0.5", "Germany": "0.0", "Japan": "+0.1" },
+                    "UK": { "USA": "+0.8", "Canada": "+0.5", "Mexico": "0.0", "France": "+0.1", "Germany": "+0.3", "Japan": "+0.2" },
+                    "France": { "USA": "+0.2", "Canada": "0.0", "Mexico": "-0.6", "UK": "0.0", "Germany": "+0.4", "Japan": "0.0" },
+                    "Germany": { "USA": "+0.6", "Canada": "+0.3", "Mexico": "0.0", "UK": "+0.3", "France": "+0.4", "Japan": "+0.5" },
+                    "Japan": { "USA": "+0.4", "Canada": "0.0", "Mexico": "+0.1", "UK": "+0.2", "France": "0.0", "Germany": "+0.2" }
                 },
                 2024: {
-                    "USA": { "Canada": "+6", "Mexico": "+2", "UK": "+7", "France": "+1", "Germany": "+5", "Japan": "+3" },
-                    "Canada": { "USA": "+6", "Mexico": "0", "UK": "+4", "France": "-1", "Germany": "+2", "Japan": "-1" },
-                    "Mexico": { "USA": "+3", "Canada": "0", "UK": "-1", "France": "-4", "Germany": "-1", "Japan": "0" },
-                    "UK": { "USA": "+7", "Canada": "+4", "Mexico": "-1", "France": "0", "Germany": "+2", "Japan": "+1" },
-                    "France": { "USA": "+1", "Canada": "-1", "Mexico": "-5", "UK": "-1", "Germany": "+3", "Japan": "-1" },
-                    "Germany": { "USA": "+5", "Canada": "+2", "Mexico": "-1", "UK": "+2", "France": "+3", "Japan": "+4" },
-                    "Japan": { "USA": "+3", "Canada": "-1", "Mexico": "0", "UK": "+1", "France": "-1", "Germany": "+1" }
+                    "USA": { "Canada": "+0.6", "Mexico": "+0.2", "UK": "+0.7", "France": "+0.1", "Germany": "+0.5", "Japan": "+0.3" },
+                    "Canada": { "USA": "+0.6", "Mexico": "0.0", "UK": "+0.4", "France": "-0.1", "Germany": "+0.2", "Japan": "-0.1" },
+                    "Mexico": { "USA": "+0.3", "Canada": "0.0", "UK": "-0.1", "France": "-0.4", "Germany": "-0.1", "Japan": "0.0" },
+                    "UK": { "USA": "+0.7", "Canada": "+0.4", "Mexico": "-0.1", "France": "0.0", "Germany": "+0.2", "Japan": "+0.1" },
+                    "France": { "USA": "+0.1", "Canada": "-0.1", "Mexico": "-0.5", "UK": "-0.1", "Germany": "+0.3", "Japan": "-0.1" },
+                    "Germany": { "USA": "+0.5", "Canada": "+0.2", "Mexico": "-0.1", "UK": "+0.2", "France": "+0.3", "Japan": "+0.4" },
+                    "Japan": { "USA": "+0.3", "Canada": "-0.1", "Mexico": "0.0", "UK": "+0.1", "France": "-0.1", "Germany": "+0.1" }
                 },
                 2025: {
-                    "USA": { "Canada": "+8", "Mexico": "+4", "UK": "+9", "France": "+3", "Germany": "+7", "Japan": "+5" },
-                    "Canada": { "USA": "+8", "Mexico": "+2", "UK": "+6", "France": "0", "Germany": "+4", "Japan": "0" },
-                    "Mexico": { "USA": "+5", "Canada": "+2", "UK": "+1", "France": "-7", "Germany": "0", "Japan": "+2" },
-                    "UK": { "USA": "+9", "Canada": "+6", "Mexico": "+1", "France": "+2", "Germany": "+4", "Japan": "+3" },
-                    "France": { "USA": "+3", "Canada": "0", "Mexico": "-7", "UK": "+1", "Germany": "+5", "Japan": "0" },
-                    "Germany": { "USA": "+7", "Canada": "+4", "Mexico": "0", "UK": "+4", "France": "+5", "Japan": "+6" },
-                    "Japan": { "USA": "+5", "Canada": "0", "Mexico": "+2", "UK": "+3", "France": "0", "Germany": "+3" }
+                    "USA": { "Canada": "+0.8", "Mexico": "+0.4", "UK": "+0.9", "France": "+0.3", "Germany": "+0.7", "Japan": "+0.5" },
+                    "Canada": { "USA": "+0.8", "Mexico": "+0.2", "UK": "+0.6", "France": "0.0", "Germany": "+0.4", "Japan": "0.0" },
+                    "Mexico": { "USA": "+0.5", "Canada": "+0.2", "UK": "+0.1", "France": "-0.7", "Germany": "0.0", "Japan": "+0.2" },
+                    "UK": { "USA": "+0.9", "Canada": "+0.6", "Mexico": "+0.1", "France": "+0.2", "Germany": "+0.4", "Japan": "+0.3" },
+                    "France": { "USA": "+0.3", "Canada": "0.0", "Mexico": "-0.7", "UK": "+0.1", "Germany": "+0.5", "Japan": "0.0" },
+                    "Germany": { "USA": "+0.7", "Canada": "+0.4", "Mexico": "0.0", "UK": "+0.4", "France": "+0.5", "Japan": "+0.6" },
+                    "Japan": { "USA": "+0.5", "Canada": "0.0", "Mexico": "+0.2", "UK": "+0.3", "France": "0.0", "Germany": "+0.3" }
                 }
             };
 
@@ -406,17 +406,17 @@
                                 // Remove all existing score classes
                                 cell.classList.remove('score-improving-strong', 'score-improving-mild', 'score-stable', 'score-deteriorating-mild', 'score-deteriorating-strong');
                                 // Add the new score class based on the value
-                                const numericScore = parseInt(score);
+                                const numericScore = parseFloat(score); // Use parseFloat for decimal scores
                                 if (!isNaN(numericScore)) {
-                                    if (numericScore >= 6) {
+                                    if (numericScore >= 0.6) {
                                         cell.classList.add('score-improving-strong');
-                                    } else if (numericScore >= 1) {
+                                    } else if (numericScore >= 0.1) {
                                         cell.classList.add('score-improving-mild');
-                                    } else if (numericScore === 0) {
+                                    } else if (numericScore === 0.0) { // Check for exact 0.0
                                         cell.classList.add('score-stable');
-                                    } else if (numericScore >= -5) {
+                                    } else if (numericScore >= -0.5) { // -0.1 to -0.5
                                         cell.classList.add('score-deteriorating-mild');
-                                    } else { // numericScore <= -6
+                                    } else { // numericScore <= -0.6
                                         cell.classList.add('score-deteriorating-strong');
                                     }
                                 }
@@ -519,7 +519,7 @@
                 insightOutput.textContent = ''; // Clear previous insight
                 loadingSpinner.classList.remove('hidden'); // Show loading spinner
 
-                let score = 'N/A';
+                let score = '---'; // Default score for N/A
                 let scoreClass = 'score-na';
 
                 // Get the score from the currently displayed year's data
@@ -527,17 +527,17 @@
                 if (yearData && yearData[country1] && yearData[country1][country2]) {
                     score = yearData[country1][country2];
                     // Determine score class based on the score value
-                    const numericScore = parseInt(score);
+                    const numericScore = parseFloat(score);
                     if (!isNaN(numericScore)) {
-                        if (numericScore >= 6) {
+                        if (numericScore >= 0.6) {
                             scoreClass = 'score-improving-strong';
-                        } else if (numericScore >= 1) {
+                        } else if (numericScore >= 0.1) {
                             scoreClass = 'score-improving-mild';
-                        } else if (numericScore === 0) {
+                        } else if (numericScore === 0.0) {
                             scoreClass = 'score-stable';
-                        } else if (numericScore >= -5) {
+                        } else if (numericScore >= -0.5) {
                             scoreClass = 'score-deteriorating-mild';
-                        } else { // numericScore <= -6
+                        } else { // numericScore <= -0.6
                             scoreClass = 'score-deteriorating-strong';
                         }
                     }
@@ -556,8 +556,7 @@
                     relationshipStatus = "stable";
                 }
 
-                // Updated prompt to remove "hypothetical"
-                let prompt = `For the year ${currentYear}, given that the bilateral relationship score between ${country1} and ${country2} is ${score} (where +10 is strongly improving and -10 is strongly deteriorating), provide a brief insight into the nature of this relationship. Focus on general aspects like diplomacy, trade, or cultural exchange, without mentioning specific real-world events. The relationship is currently considered ${relationshipStatus}.`;
+                let prompt = `For the year ${currentYear}, given that the bilateral relationship score between ${country1} and ${country2} is ${score} (where +1.0 is strongly improving and -1.0 is strongly deteriorating), provide a brief insight into the nature of this relationship. Focus on general aspects like diplomacy, trade, or cultural exchange, without mentioning specific real-world events. The relationship is currently considered ${relationshipStatus}.`;
 
                 try {
                     let chatHistory = [];
